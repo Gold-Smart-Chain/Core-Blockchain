@@ -59,7 +59,7 @@ To avoid unexpected termination of the running validator node, let's use tmux to
 ```sh
 tmux
 ```
-
+Now you can jump to step no. 6, the below given are just some extra info about `tmux`
 #### Check the already running tmux sessions
 ```sh
 tmux ls
@@ -71,14 +71,29 @@ tmux attach -t 0
 ```
 Note: zero (0) in above command is the id number of the tmux session.
 
-### Step 5: Run the docker composer
+#### to detach tmux(keep running in background)
+```sh
+ctrl + b
+```
+```sh
+d
+```
+It's a keyboard shortcut, first type control b, and then just press d (without control button pressed)
+
+#### To delete tmux session
+```sh
+ctrl + d
+```
+Note: For the mac users, please use `cmd`, instead of `ctrl`
+
+### Step 6: Run the docker composer
 
 ```sh
 sudo docker-compose up --build
 ```
 Now wait for the docker image to be built and up...
 
-### Step 6: Add peer
+### Step 7: Add peer
 When the building process done successfully and the validator prompt running then you'll have to add the peer
 as shown below. Get the enode and use it here.
 
@@ -88,6 +103,6 @@ admin.addPeer("enode://e66231bd62775d93371175dc6c54da8307b8f578391f730111823ed25
 
 You can directly paste in the running terminal using `ctrl + v` or `cmd + v` (for mac) and hit `enter`
 
-### Step 7: Start RPC Node if not, and authorized this validator
+### Step 8: Start RPC Node if not, and authorized this validator
 
 And that's all.
