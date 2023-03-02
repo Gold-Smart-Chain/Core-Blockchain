@@ -52,6 +52,25 @@ args:
         password: 123456
 ```
 
+### Step 5: Initiate tmux session
+To avoid unexpected termination of the running validator node, let's use tmux to keep the process running in the background
+
+#### For the first time, do simply run `tmux`
+```sh
+tmux
+```
+
+#### Check the already running tmux sessions
+```sh
+tmux ls
+```
+
+#### Attach the tmux session
+```sh
+tmux attach -t 0
+```
+Note: zero (0) in above command is the id number of the tmux session.
+
 ### Step 5: Run the docker composer
 
 ```sh
