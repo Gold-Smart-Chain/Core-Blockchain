@@ -20,7 +20,6 @@ package congress
 import (
 	"bytes"
 	"encoding/binary"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -30,8 +29,6 @@ import (
 	"sort"
 	"sync"
 	"time"
-	"context"
-
 
 	"github.com/ethereum/go-ethereum/metrics"
 
@@ -53,7 +50,6 @@ import (
 	"github.com/ethereum/go-ethereum/trie"
 	lru "github.com/hashicorp/golang-lru"
 	"golang.org/x/crypto/sha3"
-	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 const (
@@ -633,50 +629,10 @@ func (c *Congress) Finalize(chain consensus.ChainHeaderReader, header *types.Hea
 		receipts = &rs
 	}
 
-	// deposit block reward if any tx exists.
-	var addr [] common.Address
-	var gass [] uint64
-
-		out3, err := json.Marshal(txs)
-	    if err != nil {
-	        panic (err)
-	    }
-
-		log.Info("FULL TRANSACTION OBJECT >>> " + string(out3))
-
-
+	// execute block reward tx.
 	if len(*txs) > 0 {
-	    
-	    for i:=0; i<len(*txs); i++ {
-	    
-	    
-			TO := (*txs)[i]
-			if(TO.To() == nil) {
-				addr = append(addr,common.HexToAddress("0x0000000000000000000000000000000000000000"))
-			} else {
-				addr = append(addr,*TO.To())
-			}
-			gass = append(gass, TO.Gas())
-			
-	    }
-
-	    out, err := json.Marshal(addr)
-	    if err != nil {
-	        panic (err)
-	    }
-
-	    out1, err := json.Marshal(gass)
-	    if err != nil {
-	        panic (err)
-	    }
-	    
-	    log.Info("REQUIRED TO ADDRESS FOR TEST 2 >> " + string(out))
-	    log.Info("REQUIRED GAS INFO FOR TEST 2 >> " + string(out1))
-
-
-	    	
-		if err := c.trySendBlockReward(chain, header, state,addr,gass); err != nil {
-			panic(err)
+		if err := c.trySendBlockReward(chain, header, state); err != nil {
+			return err
 		}
 	}
 
@@ -766,47 +722,8 @@ func (c *Congress) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header
 	}
 
 	// deposit block reward if any tx exists.
-	var addr [] common.Address
-	var gass [] uint64
-	//addr = new[len(txs)]
-	
-	    out3, err := json.Marshal(txs)
-	    if err != nil {
-	        panic (err)
-	    }
-
-		log.Info("FULL TRANSACTION OBJECTS >>> " + string(out3))
-		
-	
 	if len(txs) > 0 {
-	    
-	    for i:=0; i<len(txs); i++ {
-	    
-			TO := (txs)[i]
-			if(TO.To() == nil) {
-				addr = append(addr,common.HexToAddress("0x0000000000000000000000000000000000000000"))
-			} else {
-				addr = append(addr,*TO.To())
-			}
-			gass = append(gass, TO.Gas())
-			
-	    }
-	    
-
-	    out, err := json.Marshal(addr)
-	    if err != nil {
-	        panic (err)
-	    }
-
-	    out1, err := json.Marshal(gass)
-	    if err != nil {
-	        panic (err)
-	    }
-	    
-	    log.Info("REQUIRED TO ADDRESS FOR TEST >> " + string(out))
-	    log.Info("REQUIRED GAS INFO FOR TEST >> " + string(out1))
-		
-		if err := c.trySendBlockReward(chain, header, state,addr,gass); err != nil {
+		if err := c.trySendBlockReward(chain, header, state); err != nil {
 			panic(err)
 		}
 	}
@@ -866,7 +783,7 @@ func (c *Congress) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header
 	return types.NewBlock(header, txs, nil, receipts, new(trie.Trie)), receipts, nil
 }
 
-func (c *Congress) trySendBlockReward(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, addr [] common.Address,gass [] uint64) error {
+func (c *Congress) trySendBlockReward(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB) error {
 	fee := state.GetBalance(consensus.FeeRecoder)
 	if fee.Cmp(common.Big0) <= 0 {
 		return nil
@@ -876,17 +793,9 @@ func (c *Congress) trySendBlockReward(chain consensus.ChainHeaderReader, header 
 	state.AddBalance(header.Coinbase, fee)
 	// reset fee
 	state.SetBalance(consensus.FeeRecoder, common.Big0)
-	
-	/*//get all 'from'
-	froms := make([]uint32, len(txs)) 
-	for i := uint32(0); i < uint32(len(txs)); i++ {
-		froms[i] = txs[i].from
-	}*/	
-	//logblock()
-	
-	
+
 	method := "distributeBlockReward"
-	data, err := c.abi[systemcontract.ValidatorsContractName].Pack(method,addr,gass)
+	data, err := c.abi[systemcontract.ValidatorsContractName].Pack(method)
 	if err != nil {
 		log.Error("Can't pack data for distributeBlockReward", "err", err)
 		return err
@@ -901,42 +810,6 @@ func (c *Congress) trySendBlockReward(chain consensus.ChainHeaderReader, header 
 
 	return nil
 }
-
-
-func logblock() {
-    client, err := ethclient.Dial("https://mainnet.infura.io")
-    if err != nil {
-        panic(err)
-    }
-
-    header, err := client.HeaderByNumber(context.Background(), nil)
-    if err != nil {
-        panic(err)
-    }
-
-    log.Info("CCCHHHANDAN......." + header.Number.String()) // 5671744
-
-    /*blockNumber := big.NewInt(5671744)
-    block, err := client.BlockByNumber(context.Background(), blockNumber)
-    if err != nil {
-        panic(err)
-    }
-
-    fmt.Println(block.Number().Uint64())     // 5671744
-    fmt.Println(block.Time())       // 1527211625
-    fmt.Println(block.Difficulty().Uint64()) // 3217000136609065
-    fmt.Println(block.Hash().Hex())          // 0x9e8751ebb5069389b855bba72d94902cc385042661498a415979b7b6ee9ba4b9
-    fmt.Println(len(block.Transactions()))   // 144
-
-    count, err := client.TransactionCount(context.Background(), block.Hash())
-    if err != nil {
-        panic(err)
-    }
-
-    fmt.Println(count) // 144
-	*/
-}
-
 
 func (c *Congress) tryPunishValidator(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB) error {
 	number := header.Number.Uint64()

@@ -10,7 +10,7 @@ RUN apt-get update && \
   apt install -y tmux
 
 COPY --from=builder /go-ethereum/build/bin/geth /app/geth
-ADD ./minerdeploy/testnet.json /app/genesis.json
+ADD ./minerdeploy/genesis.json /app/genesis.json
 ADD ./minerdeploy/start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
@@ -27,8 +27,9 @@ RUN echo $privatekey > /app/.privatekey
 
 WORKDIR "/app"
 
-RUN /app/geth --datadir stand account import /app/.privatekey --password /app/.accountpassword
-RUN /app/geth --datadir stand init /app/genesis.json
+# RUN /app/geth --datadir gscvalidator account new --password /app/.accountpassword
+RUN /app/geth --datadir gscvalidator account import /app/.privatekey --password /app/.accountpassword
+RUN /app/geth --datadir gscvalidator init /app/genesis.json
 
 CMD /app/start.sh
 EXPOSE 8545

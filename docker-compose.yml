@@ -3,15 +3,15 @@ services:
   geth-dev-miner-1:
     hostname: geth-dev-miner-1
     environment:
-      - address=61184328cfd30d8caa78438884d5322ce203c045 #derived from the private key which is passed in the args
+      - address=0x31B3198e314d450eF30527806c6FE9fAfFc310e5 #derived from the private key which is passed in the args
       - bootnodeId=enr:-KO4QMXcrXobuLS0b8Rz8UjPY1P9lE6UhKLNWBwJp2ujNncvN_YSYVTyCTB_2Co37hcPBIXbV4FCJqzrXIKQq0WFFAWGAYT2lWxQg2V0aMfGhNY4HfiAgmlkgnY0gmlwhKdj7-OJc2VjcDI1NmsxoQPmYjG9YnddkzcRddxsVNqDB7j1eDkfcwERgj7SXf_xIoRzbmFwwIN0Y3CCf5yDdWRwgn-c #derived from the nodekeyhex of the bootnode
       - bootnodeIp=167.99.239.227
     build:
       context: .
       dockerfile: ./minerdeploy/Dockerfile
       args:
-        privatekey: f8fe1beff5109x0x0x006484fd6e6f8617b251dcad7b4b9a724f26f5 # Please don't do something like this in production, okay?
-        password: 123456
+        privatekey: e1c6283aba81d01b3a-dummy-1782d0f5c4b7d385489d83833f6fe08e46ed #replace it with your private key associated with the wallet address provided above
+        password: 12337678
     ports:
       - 8546:8545
     container_name: geth-miner-1
