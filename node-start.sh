@@ -36,7 +36,7 @@ welcome(){
   echo -e "\t${ORANGE}Total nodes installed: $totalNodes"
   echo -e "${GREEN}
   \t+------------------------------------------------+
-  \t+   DPos node Execution Utility
+  \t+   POA - Advanced node Execution Utility
   \t+   Target OS: Ubuntu 20.04 LTS (Focal Fossa)
   \t+   Your OS: $(. /etc/os-release && printf '%s\n' "${PRETTY_NAME}") 
   \t+   example usage: ./node-start.sh --help
